@@ -414,6 +414,5 @@ const controller = (function (quizCtrl, UICntrl) {
         UICntrl.newDesign(answerResult, answer);
       }
     }
-    console.log("test");
   });
 })(quizController, UIController);
