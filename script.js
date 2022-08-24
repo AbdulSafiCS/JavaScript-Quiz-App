@@ -193,6 +193,7 @@ const UIController = (function () {
     questDeleteBtn: document.getElementById("question-delete-btn"),
     questsClearBtn: document.getElementById("questions-clear-btn"),
     resultsListWrapper: document.querySelector(".results-list-wrapper"),
+    clearResultsBtn: document.getElementById("results-clear-btn"),
     /**Quiz Section */
     askedQuestText: document.getElementById("asked-question-text"),
     quizOptionWrapper: document.querySelector(".quiz-options-wrapper"),
@@ -204,7 +205,7 @@ const UIController = (function () {
     emotionIcon: document.getElementById("emotion"),
     nextQuestBtn: document.getElementById("next-question-btn"),
     /** landing page elements */
-    quizsection: document.querySelector(".quiz-container"),
+    quizSection: document.querySelector(".quiz-container"),
     landingPageSection: document.querySelector(".landing-page-container"),
     startQuizBtn: document.getElementById("start-quiz-btn"),
     firstNameInput: document.getElementById("firstname"),
@@ -463,7 +464,7 @@ const UIController = (function () {
             currPerson.fullName.push(domItems.firstNameInput.value);
             currPerson.fullName.push(domItems.lastNameInput.value);
             domItems.landingPageSection.style.display = "none";
-            domItems.quizsection.style.display = "block";
+            domItems.quizSection.style.display = "block";
             console.log(currPerson);
           } else {
             alert("Quiz not ready, ask admin to add questions to the quiz");
@@ -483,7 +484,7 @@ const UIController = (function () {
         currPerson.fullName[1] +
         ", your final score is : " +
         currPerson.score;
-      domItems.quizsection.style.display = "none";
+      domItems.quizSection.style.display = "none";
       domItems.finaResultSection.style.display = "block";
     },
     addResultOnPanel: function (userData) {
@@ -508,6 +509,29 @@ const UIController = (function () {
           "afterbegin",
           resultHTML
         );
+      }
+    },
+    deleteResult: function (event, userData) {
+      var getId, personsArr;
+      personsArr = userData.getPersonData();
+      if ("delete-result-btn_".indexOf(event.target.id)) {
+        getId = parseInt(event.target.id.split("_")[1]);
+        for (let i = 0; i < personsArr.length; i++) {
+          if (personsArr[i].id === getId) {
+            personsArr.splice(i, 1);
+            userData.setPersonData(personsArr);
+          }
+        }
+      }
+    },
+    clearResultList: function (userData) {
+      if (userData.getPersonData() != null) {
+        if (userData.getPersonData().length > 0) {
+          if (confirm("Entire result list will be deleted, are you sure?")) {
+            userData.removePersonData();
+            domItems.resultsListWrapper.innerHTML = "";
+          }
+        }
       }
     },
   };
@@ -605,4 +629,11 @@ const controller = (function (quizCtrl, UICntrl) {
     );
   });
   UICntrl.addResultOnPanel(quizCtrl.getPersonLocalStorage);
+  selectedDomItems.resultsListWrapper.addEventListener("click", function (e) {
+    UICntrl.deleteResult(e, quizCtrl.getPersonLocalStorage);
+    UICntrl.addResultOnPanel(quizCtrl.getPersonLocalStorage);
+  });
+  selectedDomItems.clearResultsBtn.addEventListener("click", function () {
+    UICntrl.clearResultList(quizCtrl.getPersonLocalStorage);
+  });
 })(quizController, UIController);
