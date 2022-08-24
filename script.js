@@ -109,6 +109,12 @@ const quizController = (function () {
         return false;
       }
     },
+    isFinished: function () {
+      return (
+        quizProgress.questionIndex + 1 ===
+        questionLocalStorage.getQuestionCollection().length
+      );
+    },
   };
 })();
 
@@ -135,6 +141,9 @@ const UIController = (function () {
     progressPar: document.getElementById("progress"),
     instAnsContainer: document.querySelector(".instant-answer-container"),
     instAnsText: document.getElementById("instant-answer-text"),
+    instAnsDiv: document.getElementById("instant-answer-wrapper"),
+    emotionIcon: document.getElementById("emotion"),
+    nextQuestBtn: document.getElementById("next-question-btn"),
   };
 
   return {
@@ -346,14 +355,29 @@ const UIController = (function () {
         storageQuestList.getQuestionCollection().length;
     },
     newDesign: function (ansResult, selectedAnswer) {
-      var twoOptions;
+      var twoOptions, index;
+      index = 0;
+      if (ansResult) {
+        index = 1;
+      }
       twoOptions = {
         instAnswerText: ["This is a wrong answer", "this is a correct answer"],
+        instAnswerClass: ["red", "green"],
+        emotionType: ["images/sad.png", "images/happy.png"],
+        optionSpanBg: ["rgba(200, 0, 0, .7)", "rgba(0, 250, 0, .2)"],
       };
       domItems.quizOptionWrapper.style.cssText =
         "opacity: 0.6; pointer-events: none;";
       domItems.instAnsContainer.style.opacity = 1;
-      domItems.instAnsText.textContent = twoOptions.instAnswerText[0];
+      domItems.instAnsText.textContent = twoOptions.instAnswerText[index];
+      domItems.instAnsDiv.className = twoOptions.instAnswerClass[index];
+      domItems.emotionIcon.setAttribute("src", twoOptions.emotionType[index]);
+      selectedAnswer.previousElementSibling.style.backgroundColor =
+        twoOptions.optionSpanBg[index];
+    },
+    resetDesign: function () {
+      domItems.quizOptionWrapper.style.cssText = "";
+      domItems.instAnsContainer.style.opacity = 0;
     },
   };
 })();
@@ -412,6 +436,32 @@ const controller = (function (quizCtrl, UICntrl) {
         );
         var answerResult = quizCtrl.checkAnswer(answer);
         UICntrl.newDesign(answerResult, answer);
+        if (quizCtrl.isFinished()) {
+          selectedDomItems.nextQuestBtn.textContent = "Finish";
+        }
+        var nextQuestion = function (questData, progress) {
+          if (quizCtrl.isFinished()) {
+            //finish quiz
+            console.log("finished");
+          } else {
+            UICntrl.resetDesign();
+            quizCtrl.getQuizProgress.questionIndex++;
+            UICntrl.displayQuestion(
+              quizCtrl.getQuestionLocalStorage,
+              quizCtrl.getQuizProgress
+            );
+            UICntrl.displayProgress(
+              quizController.getQuestionLocalStorage,
+              quizCtrl.getQuizProgress
+            );
+          }
+        };
+        selectedDomItems.nextQuestBtn.onclick = function () {
+          nextQuestion(
+            quizCtrl.getQuestionLocalStorage,
+            quizCtrl.getQuizProgress
+          );
+        };
       }
     }
   });
